@@ -4,8 +4,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     groq_api_key: str
     session_token_budget: int = 15000  # max tokens per session; override via SESSION_TOKEN_BUDGET in .env
-    webshare_proxy_username: str = ""
-    webshare_proxy_password: str = ""
+    supadata_api_key: str = ""
 
     model_config = {"env_file": ".env"}
 
