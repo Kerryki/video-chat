@@ -64,7 +64,15 @@ async def fetch_transcript(video_id: str) -> list[dict]:
     loop = asyncio.get_running_loop()
 
     def _fetch():
-        api = YouTubeTranscriptApi()
+        from config import settings
+        proxies = None
+        if settings.webshare_proxy_username and settings.webshare_proxy_password:
+            proxy_url = (
+                f"https://{settings.webshare_proxy_username}:{settings.webshare_proxy_password}"
+                f"@p.webshare.io:80"
+            )
+            proxies = {"https": proxy_url, "http": proxy_url}
+        api = YouTubeTranscriptApi(proxies=proxies)
         result = api.fetch(video_id)
         return [{"text": s.text, "start": s.start, "duration": s.duration} for s in result]
 
