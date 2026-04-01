@@ -65,14 +65,14 @@ async def fetch_transcript(video_id: str) -> list[dict]:
 
     def _fetch():
         from config import settings
-        proxies = None
+        from youtube_transcript_api.proxies import WebshareProxyConfig
+        proxy_config = None
         if settings.webshare_proxy_username and settings.webshare_proxy_password:
-            proxy_url = (
-                f"https://{settings.webshare_proxy_username}:{settings.webshare_proxy_password}"
-                f"@p.webshare.io:80"
+            proxy_config = WebshareProxyConfig(
+                proxy_username=settings.webshare_proxy_username,
+                proxy_password=settings.webshare_proxy_password,
             )
-            proxies = {"https": proxy_url, "http": proxy_url}
-        api = YouTubeTranscriptApi(proxies=proxies)
+        api = YouTubeTranscriptApi(proxy_config=proxy_config)
         result = api.fetch(video_id)
         return [{"text": s.text, "start": s.start, "duration": s.duration} for s in result]
 
