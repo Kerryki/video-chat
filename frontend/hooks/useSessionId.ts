@@ -1,23 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { pingBackend } from "@/lib/api";
 
+// Generate once per page load — not persisted, so a refresh always starts a fresh session.
+const PAGE_SESSION_ID = uuidv4();
+
 export function useSessionId(): string {
-  const [sessionId, setSessionId] = useState<string>("");
+  const [sessionId] = useState<string>(PAGE_SESSION_ID);
 
-  useEffect(() => {
-    let id = sessionStorage.getItem("videochat_session_id");
-    if (!id) {
-      id = uuidv4();
-      sessionStorage.setItem("videochat_session_id", id);
-    }
-    setSessionId(id);
-
-    // Wake Railway backend on first load
+  useState(() => {
     pingBackend();
-  }, []);
+  });
 
   return sessionId;
 }

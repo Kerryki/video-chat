@@ -2,18 +2,18 @@ import asyncio
 from functools import lru_cache
 
 import chromadb
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 
-EMBED_MODEL = "all-MiniLM-L6-v2"
+EMBED_MODEL = "BAAI/bge-small-en-v1.5"  # ~130MB ONNX model, no PyTorch required
 EMBED_BATCH = 64
 
 _client = chromadb.Client()  # in-memory, session-scoped
 
 
 @lru_cache(maxsize=1)
-def _get_model() -> SentenceTransformer:
+def _get_model() -> TextEmbedding:
     """Load the embedding model once and cache it for the process lifetime."""
-    return SentenceTransformer(EMBED_MODEL)
+    return TextEmbedding(EMBED_MODEL)
 
 
 def _collection(session_id: str) -> chromadb.Collection:
@@ -31,7 +31,7 @@ async def embed_and_store(chunks: list[dict], session_id: str) -> None:
         texts = [c["text"] for c in batch]
 
         embeddings = await loop.run_in_executor(
-            None, lambda t=texts: model.encode(t, convert_to_numpy=True).tolist()
+            None, lambda t=texts: list(model.embed(t))
         )
 
         col.upsert(
@@ -68,7 +68,7 @@ async def retrieve(
     loop = asyncio.get_running_loop()
     model = _get_model()
     query_embedding = await loop.run_in_executor(
-        None, lambda: model.encode([query], convert_to_numpy=True).tolist()[0]
+        None, lambda: list(model.embed([query]))[0]
     )
 
     where = {"video_id": video_id_filter} if video_id_filter else None
