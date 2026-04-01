@@ -5,10 +5,10 @@ import type { SeekTarget } from "@/types";
 
 declare global {
   interface Window {
-    YT: typeof YT;
     onYouTubeIframeAPIReady: () => void;
   }
 }
+
 
 let apiLoaded = false;
 let apiReady = false;
