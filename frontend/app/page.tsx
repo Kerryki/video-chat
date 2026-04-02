@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useCallback } from "react";
 import { useVideoChat } from "@/context/VideoChatStore";
 import { useSessionId } from "@/hooks/useSessionId";
 import { VideoInput } from "@/components/VideoInput";
@@ -21,7 +20,7 @@ export default function Home() {
 
 function EmptyState({ sessionId }: { sessionId: string }) {
   return (
-    <div className="flex flex-1 items-center justify-center bg-gray-50 px-4 pb-safe">
+    <div className="flex flex-1 items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-lg flex flex-col items-center gap-6 text-center">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
@@ -40,57 +39,25 @@ function EmptyState({ sessionId }: { sessionId: string }) {
 }
 
 function LoadedLayout({ sessionId }: { sessionId: string }) {
-  const [pip, setPip] = useState(false);
-
-  const handleChatScroll = useCallback((scrollTop: number) => {
-    setPip(scrollTop > 60);
-  }, []);
-
   return (
-    <>
-      {/* ── Mobile layout: stacked vertically, PiP on scroll ── */}
-      <div className="md:hidden h-dvh flex flex-col overflow-hidden bg-white">
-        {/* Video — full width at top normally, fixed corner when pip */}
-        <div
-          className={
-            pip
-              ? "fixed bottom-20 right-3 z-50 w-40 rounded-xl overflow-hidden shadow-2xl ring-1 ring-black/10 bg-black"
-              : "flex-shrink-0 w-full bg-black"
-          }
-        >
+    <div className="h-dvh flex flex-col md:flex-row overflow-hidden bg-white">
+      {/* Left panel: player + sidebar */}
+      <div className="flex-shrink-0 flex flex-col md:w-[42%] md:border-r border-gray-100">
+        {/* Player sits at the top on both mobile and desktop */}
+        <div className="flex-shrink-0 bg-black">
           <VideoPlayer />
         </div>
 
-        {/* Compact "add another video" strip — only when not pip */}
-        {!pip && (
-          <div className="flex-shrink-0 border-b border-gray-100 px-3 py-2">
-            <VideoInput sessionId={sessionId} compact />
-          </div>
-        )}
-
-        {/* Chat fills all remaining space */}
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-          <ChatPanel sessionId={sessionId} onScroll={handleChatScroll} />
+        {/* Sidebar: compact fixed height on mobile, fills remaining space on desktop */}
+        <div className="overflow-y-auto max-h-36 md:max-h-none md:flex-1 p-3 border-t border-gray-100">
+          <VideoSidebar sessionId={sessionId} />
         </div>
       </div>
 
-      {/* ── Desktop layout: side by side ── */}
-      <div className="hidden md:flex h-dvh flex-row overflow-hidden bg-white">
-        {/* Left panel: player + sidebar */}
-        <div className="flex-shrink-0 flex flex-col w-[42%] border-r border-gray-100 overflow-hidden">
-          <div className="flex-shrink-0 bg-black">
-            <VideoPlayer />
-          </div>
-          <div className="flex-1 overflow-y-auto p-3 border-t border-gray-100">
-            <VideoSidebar sessionId={sessionId} />
-          </div>
-        </div>
-
-        {/* Right panel: chat */}
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-          <ChatPanel sessionId={sessionId} />
-        </div>
+      {/* Right panel: chat fills remaining height */}
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+        <ChatPanel sessionId={sessionId} />
       </div>
-    </>
+    </div>
   );
 }

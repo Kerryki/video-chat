@@ -27,7 +27,7 @@ export function TimestampChip({
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 rounded-full bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs text-gray-700 transition-colors max-w-full"
+        className="inline-flex items-center gap-1 rounded-full bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs text-gray-700 transition-colors"
       >
         <PlayIcon />
         {label}
@@ -43,7 +43,7 @@ export function TimestampChip({
           payload: { videoId: ref_.video_id, seconds: ref_.seconds },
         })
       }
-      className="inline-flex items-center gap-1 rounded-full bg-blue-100 hover:bg-blue-200 px-3 py-1 text-xs text-blue-700 transition-colors max-w-full"
+      className="inline-flex items-center gap-1 rounded-full bg-blue-100 hover:bg-blue-200 px-3 py-1 text-xs text-blue-700 transition-colors"
     >
       <PlayIcon />
       {label}

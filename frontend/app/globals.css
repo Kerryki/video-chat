@@ -24,20 +24,3 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
-
-/* Safe-area padding for iPhone home bar / notch */
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.pb-safe-plus-3 {
-  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-}
-
-/* Hide scrollbar cross-browser (Firefox + WebKit/iOS) */
-.scrollbar-none {
-  scrollbar-width: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}

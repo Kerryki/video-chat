@@ -17,7 +17,7 @@ const MODES: { value: ChatMode; label: string; minVideos: number }[] = [
 
 export function ModeSelector({ mode, onChange, videoCount }: ModeSelectorProps) {
   return (
-    <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+    <div className="flex flex-wrap gap-1.5">
       {MODES.map((m) => {
         const disabled = videoCount < m.minVideos;
         const active = mode === m.value;
@@ -31,7 +31,7 @@ export function ModeSelector({ mode, onChange, videoCount }: ModeSelectorProps) 
                 ? `Add ${m.minVideos - videoCount} more video${m.minVideos - videoCount > 1 ? "s" : ""} to use this`
                 : undefined
             }
-            className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               disabled
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                 : active
