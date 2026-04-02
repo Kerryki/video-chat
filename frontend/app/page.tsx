@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { useVideoChat } from "@/context/VideoChatStore";
 import { useSessionId } from "@/hooks/useSessionId";
 import { VideoInput } from "@/components/VideoInput";
@@ -39,23 +40,37 @@ function EmptyState({ sessionId }: { sessionId: string }) {
 }
 
 function LoadedLayout({ sessionId }: { sessionId: string }) {
+  const [pip, setPip] = useState(false);
+
+  const handleChatScroll = useCallback((scrollTop: number) => {
+    setPip(scrollTop > 60);
+  }, []);
+
   return (
     <>
-      {/* ── Mobile layout: stacked vertically ── */}
+      {/* ── Mobile layout: stacked vertically, PiP on scroll ── */}
       <div className="md:hidden h-dvh flex flex-col overflow-hidden bg-white">
-        {/* Video player pinned at top */}
-        <div className="flex-shrink-0 bg-black w-full">
+        {/* Video — full width at top normally, fixed corner when pip */}
+        <div
+          className={
+            pip
+              ? "fixed bottom-20 right-3 z-50 w-40 rounded-xl overflow-hidden shadow-2xl ring-1 ring-black/10 bg-black"
+              : "flex-shrink-0 w-full bg-black"
+          }
+        >
           <VideoPlayer />
         </div>
 
-        {/* Compact "add another video" strip */}
-        <div className="flex-shrink-0 border-b border-gray-100 px-3 py-2">
-          <VideoInput sessionId={sessionId} compact />
-        </div>
+        {/* Compact "add another video" strip — only when not pip */}
+        {!pip && (
+          <div className="flex-shrink-0 border-b border-gray-100 px-3 py-2">
+            <VideoInput sessionId={sessionId} compact />
+          </div>
+        )}
 
         {/* Chat fills all remaining space */}
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-          <ChatPanel sessionId={sessionId} />
+          <ChatPanel sessionId={sessionId} onScroll={handleChatScroll} />
         </div>
       </div>
 
