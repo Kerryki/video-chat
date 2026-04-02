@@ -56,6 +56,8 @@ export function useYouTubePlayer({
       if (playerRef.current) return; // already created
 
       playerRef.current = new window.YT.Player(containerId, {
+        width: "100%",
+        height: "100%",
         videoId: initialVideoId,
         playerVars: {
           autoplay: 0,
