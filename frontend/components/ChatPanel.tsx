@@ -65,7 +65,7 @@ export function ChatPanel({ sessionId }: ChatPanelProps) {
       </div>
 
       {/* Input area */}
-      <div className="border-t border-gray-100 px-4 py-3 space-y-2">
+      <div className="border-t border-gray-100 px-4 pt-3 pb-safe-plus-3 space-y-2">
         <ModeSelector
           mode={mode}
           onChange={setMode}
