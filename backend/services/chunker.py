@@ -1,5 +1,5 @@
-CHUNK_SIZE = 5    # number of transcript segments per chunk
-OVERLAP = 1       # segments to overlap between adjacent chunks
+CHUNK_SIZE = 15   # number of transcript segments per chunk
+OVERLAP = 2       # segments to overlap between adjacent chunks
 
 
 def chunk_transcript(segments: list[dict], video_id: str) -> list[dict]:

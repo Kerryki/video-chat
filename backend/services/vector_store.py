@@ -5,7 +5,6 @@ import chromadb
 from fastembed import TextEmbedding
 
 EMBED_MODEL = "BAAI/bge-small-en-v1.5"  # ~130MB ONNX model, no PyTorch required
-EMBED_BATCH = 64
 
 _client = chromadb.Client()  # in-memory, session-scoped
 
@@ -26,28 +25,28 @@ async def embed_and_store(chunks: list[dict], session_id: str) -> None:
     loop = asyncio.get_running_loop()
     model = _get_model()
 
-    for i in range(0, len(chunks), EMBED_BATCH):
-        batch = chunks[i : i + EMBED_BATCH]
-        texts = [c["text"] for c in batch]
+    texts = [c["text"] for c in chunks]
 
-        embeddings = await loop.run_in_executor(
-            None, lambda t=texts: list(model.embed(t))
-        )
+    # Pass all texts in one call — fastembed handles batching internally.
+    # This avoids repeated executor overhead from looping multiple batches.
+    embeddings = await loop.run_in_executor(
+        None, lambda: list(model.embed(texts))
+    )
 
-        col.upsert(
-            ids=[f"{c['video_id']}_{c['chunk_index']}" for c in batch],
-            documents=texts,
-            embeddings=embeddings,
-            metadatas=[
-                {
-                    "video_id": c["video_id"],
-                    "start_time": c["start_time"],
-                    "end_time": c["end_time"],
-                    "chunk_index": c["chunk_index"],
-                }
-                for c in batch
-            ],
-        )
+    col.upsert(
+        ids=[f"{c['video_id']}_{c['chunk_index']}" for c in chunks],
+        documents=texts,
+        embeddings=embeddings,
+        metadatas=[
+            {
+                "video_id": c["video_id"],
+                "start_time": c["start_time"],
+                "end_time": c["end_time"],
+                "chunk_index": c["chunk_index"],
+            }
+            for c in chunks
+        ],
+    )
 
 
 async def retrieve(
