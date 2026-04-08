@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 
 from models.schemas import AddVideoRequest, VideoMeta
-from services import session_store, vector_store
+from services import session_store
 from services.chunker import chunk_transcript
 from services.summarizer import generate_summary
 from services.youtube import (
@@ -57,8 +57,7 @@ async def add_video(request: Request, body: AddVideoRequest):
     chunks = chunk_transcript(transcript, video_id)
     duration = chunks[-1]["end_time"] if chunks else 0.0
 
-    # Embed and store
-    await vector_store.embed_and_store(chunks, body.session_id)
+    session_store.store_chunks(body.session_id, video_id, chunks)
 
     # Generate summary
     summary_data = await generate_summary(chunks)

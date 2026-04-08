@@ -19,6 +19,7 @@ class SessionData:
     loaded_video_ids: list[str] = field(default_factory=list)
     video_titles: dict[str, str] = field(default_factory=dict)
     video_durations: dict[str, float] = field(default_factory=dict)
+    video_chunks: dict[str, list[dict]] = field(default_factory=dict)
     last_accessed: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     tokens_used: int = 0
 
@@ -59,6 +60,11 @@ def get_history(session_id: str) -> list[Message]:
     return get_or_create(session_id).conversation_history
 
 
+def store_chunks(session_id: str, video_id: str, chunks: list[dict]) -> None:
+    session = get_or_create(session_id)
+    session.video_chunks[video_id] = chunks
+
+
 def add_tokens(session_id: str, count: int) -> None:
     session = get_or_create(session_id)
     session.tokens_used += count
@@ -74,8 +80,6 @@ async def _cleanup_loop() -> None:
         cutoff = datetime.now(timezone.utc) - timedelta(hours=SESSION_TTL_HOURS)
         expired = [sid for sid, s in _sessions.items() if s.last_accessed < cutoff]
         for sid in expired:
-            from services.vector_store import delete_session
-            delete_session(sid)
             _sessions.pop(sid, None)
 
 

@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from groq import AsyncGroq
 
 from config import settings
-from services import session_store, vector_store
+from services import session_store
 from models.schemas import TimestampRef, ChunkSource
 
 _groq = AsyncGroq(api_key=settings.groq_api_key)
@@ -132,6 +132,14 @@ def _build_context(
     return "\n".join(lines)
 
 
+def _get_all_chunks(session) -> list[dict]:
+    """Return all stored transcript chunks for every loaded video."""
+    chunks = []
+    for vid in session.loaded_video_ids:
+        chunks += session.video_chunks.get(vid, [])
+    return chunks
+
+
 async def answer(
     session_id: str,
     message: str,
@@ -141,17 +149,7 @@ async def answer(
     valid_video_ids = set(session.loaded_video_ids)
     video_durations = dict(session.video_durations)
 
-    n_results = 20 if mode == "find_all" else 8
-
-    if mode in ("compare", "unique_coverage") and len(session.loaded_video_ids) > 1:
-        chunks = []
-        per_video = max(3, n_results // len(session.loaded_video_ids))
-        for vid in session.loaded_video_ids:
-            chunks += await vector_store.retrieve(
-                message, session_id, n_results=per_video, video_id_filter=vid
-            )
-    else:
-        chunks = await vector_store.retrieve(message, session_id, n_results=n_results)
+    chunks = _get_all_chunks(session)
 
     system_content = BASE_SYSTEM
     if mode in MODE_SUFFIX:
